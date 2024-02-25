@@ -7,25 +7,27 @@
     <link rel="stylesheet" type="text/css" href="styles.css">
 
     <!-- General -->
-    <script src="src/constants/Difficulty.js"></script>
-    <script src="src/Config.js"></script>
+    <script src="src/constants/Difficulty.js" async defer></script>
+    <script src="src/Config.js" async defer></script>
     
     <!-- Engines -->
-    <script src="src/engine/createNumberProxy.js"></script>
-    <script src="src/engine/LockEngine.js"></script>
-    <script src="src/engine/LockPickEngine.js"></script>
+    <script src="src/engine/createNumberProxy.js" async defer></script>
+    <script src="src/engine/LockEngine.js" async defer></script>
+    <script src="src/engine/LockPickEngine.js" async defer></script>
 
     <!-- Graphics -->
-    <script src="src/graphics/Lock.js"></script>
-    <script src="src/graphics/LockPick.js"></script>
+    <script src="src/graphics/Cylinder.js" async defer></script>
+    <script src="src/graphics/LockPick.js" async defer></script>
+    <script src="src/graphics/Lock.js" async defer></script>
 
     <!-- App start -->
-    <script src="src/main.js"></script>
+    <script src="src/main.js" async defer></script>
   </head>
   <body>
   </body>
+  <img id='keyhole-img' src="img/keyhole.png" hidden/>
   <div id="container">
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" width="800" height="800"></canvas>
     <div id="stats">
       <div><p>Lockpick HP: <span id="lockpick-hp"></span></p></div>
     </div>

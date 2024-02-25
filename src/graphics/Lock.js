@@ -1,46 +1,13 @@
+/**
+ * Represents the whole lock with cylinder and lock pick.
+ */
 class Lock {
   constructor(difficulty, context) {
-    this.engine = new LockEngine(difficulty);
-    this.context = context;
-    // TODO: think about possible 'a'/'d' usage, but will have to
-    //       introduce some mechanism that would prevent doubling
-    //       of action (e.g. pressing 'a' and then 'd' at the same time)
-    this.allowedKeys = ['e'];
-
-    document.onkeydown = (ev) => {
-      if (this.isKeyAllowed(ev.key)) {
-        this.pickTheLock();
-      }
-    };
-    document.onkeyup = (ev) => {
-      if (this.isKeyAllowed(ev.key)) {
-        this.stopPickingTheLock();
-      }
-    };
+    this.cylinder = new Cylinder(difficulty, context);
+    this.lockpick = new LockPick(difficulty, context);
   }
 
-  /**
-   * @returns True if the lock is opened. False otherwise, may indicate
-   * partial success.
-   */
-  pickTheLock() {
-    console.log('picking lock');
-  }
-
-  /**
-   * When stopping on a
-   */
-  stopPickingTheLock() {
-    if (this.engine.isSolved()) {
-      // don't revert the lock if we solved it
-      return;
-    }
-
-    this.engine.revert();
-    console.log('reverting lock to initial position');
-  }
-
-  isKeyAllowed(key) {
-    return this.allowedKeys.includes(key);
+  draw() {
+    this.cylinder.draw();
   }
 }

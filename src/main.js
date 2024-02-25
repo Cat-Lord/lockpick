@@ -8,5 +8,5 @@ window.onload = function () {
   // TODO: make use of dynamic configuration
   const config = new Config(difficulty);
   const lock = new Lock(difficulty, canvas.getContext('2d'));
-  const lockpick = new LockPick(difficulty, canvas.getContext('2d'));
+  lock.draw();
 };

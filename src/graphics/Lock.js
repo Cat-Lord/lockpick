@@ -1,36 +1,47 @@
 class Lock {
-  constructor(engine, context) {
+  constructor(engine, lockPickEngine, context) {
     this.engine = engine;
+    this.lockPickEngine = lockPickEngine;
     this.context = context;
+    // TODO: think about possible 'a'/'d' usage, but will have to
+    //       introduce some mechanism that would prevent doubling
+    //       of action (e.g. pressing 'a' and then 'd' at the same time)
+    this.allowedKeys = ['e'];
 
     document.onkeydown = (ev) => {
-      if (ev.key === 'a' || ev.key === 'd') {
-        this.tryOpenLock();
+      if (this.isKeyAllowed(ev.key)) {
+        this.pickTheLock();
       }
     };
-    document.onkeyup = this.revertLockPosition;
+    document.onkeyup = (ev) => {
+      if (this.isKeyAllowed(ev.key)) {
+        this.stopPickingTheLock();
+      }
+    };
   }
 
   /**
    * @returns True if the lock is opened. False otherwise, may indicate
    * partial success.
    */
-  tryLockOpening(ev) {}
+  pickTheLock() {
+    console.log('picking lock');
+  }
 
   /**
    * When stopping on a
    */
-  revertLockPosition() {
-    if (this.isSolved()) {
+  stopPickingTheLock() {
+    if (this.engine.isSolved()) {
       // don't revert the lock if we solved it
       return;
     }
 
-    // TODO: turn the angle down, determine the suitable value
-    this.angle = Math.max(this.angle - 5, 0);
+    this.engine.revert();
+    console.log('reverting lock to initial position');
   }
 
-  isSolved() {
-    return this.angle === 90;
+  isKeyAllowed(key) {
+    return this.allowedKeys.includes(key);
   }
 }

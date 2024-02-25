@@ -22,12 +22,48 @@
  * This means that the person picking such lock as in the example above
  * has to guess and select any chamber from 1 to 7 (inclusive). Any other
  * selection puts the lock pick under tension.
+ *
+ * Picking a lock is represented with a number 0-100, 0 meaning the lock
+ * is in its initial state, 100 meaning the lock has been open (can be
+ * viewed as percentage).
  */
 class LockEngine {
-  constructor(config) {
-    this.chambersCount = this.generateChambers(config.difficulty);
+  constructor(difficulty) {
+    // TODO: create a more sophisticated algorithm or find suitable values for each difficulty
+    this.tolerance = 2;
+    this.pickingProgress = 0;
+
+    switch (difficulty) {
+      default: {
+        this.chambersCount = 10;
+      }
+      // TODO: after testing set the most fitting values.
+      // case difficulty.easy:
+      //   break;
+      // case difficulty.medium:
+      //   break;
+      // case difficulty.hard:
+      //   break;
+      // case difficulty.veryHard:
+      //   break;
+    }
     this.correctChamber = this.selectRandomChamber(this.chambersCount);
-    this.tolerance = this.generateTolerance(config.difficulty);
+  }
+
+  pickLock() {
+    // user tries to pick the lock
+  }
+
+  revert() {
+    // user stopped picking, revert lock position if necessary
+  }
+
+  isLockPickStuck() {
+    // return true if the lock pick is unable to move further
+  }
+
+  isSolved() {
+    return this.pickingProgress === 100;
   }
 
   getChambersCount() {
@@ -51,30 +87,7 @@ class LockEngine {
     return -1;
   }
 
-  generateChambers(difficulty) {
-    switch (difficulty) {
-      default: {
-        return 10;
-      }
-      // TODO: after testing set the most fitting values.
-      // case difficulty.easy:
-      //   break;
-      // case difficulty.medium:
-      //   break;
-      // case difficulty.hard:
-      //   break;
-      // case difficulty.veryHard:
-      //   break;
-    }
-  }
-
-  generateTolerance(difficulty) {
-    return 2;
-    // TODO: create a more sophisticated algorithm or find
-    // suitable values for each difficulty
-  }
-
   selectRandomChamber(chambersCount) {
-    return Math.trunc(Math.random() * chambersCount);
+    return;
   }
 }

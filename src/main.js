@@ -4,7 +4,11 @@ window.onload = function () {
     throw new Error('Canvas not found.');
   }
 
-  const config = new Config(Difficulty.easy);
-  const engine = new LockEngine(config);
-  const lock = new Lock(engine, canvas.getContext('2d'), config);
+  const difficulty = Difficulty.easy;
+  // TODO: make use of dynamic configuration
+  const config = new Config(difficulty);
+  const engine = new LockEngine(difficulty);
+  const pickEngine = new LockPickEngine(difficulty);
+
+  const lock = new Lock(engine, pickEngine, canvas.getContext('2d'));
 };

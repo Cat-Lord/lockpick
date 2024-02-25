@@ -9,8 +9,9 @@
     <!-- General -->
     <script src="src/constants/Difficulty.js"></script>
     <script src="src/Config.js"></script>
-
+    
     <!-- Engines -->
+    <script src="src/engine/createNumberProxy.js"></script>
     <script src="src/engine/LockEngine.js"></script>
     <script src="src/engine/LockPickEngine.js"></script>
 
@@ -25,6 +26,9 @@
   </body>
   <div id="container">
     <canvas id="canvas"></canvas>
+    <div id="stats">
+      <div><p>Lockpick HP: <span id="lockpick-hp"></span></p></div>
+    </div>
   </div>
   </body>
 </html>

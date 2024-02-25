@@ -1,7 +1,6 @@
 class Lock {
-  constructor(engine, lockPickEngine, context) {
-    this.engine = engine;
-    this.lockPickEngine = lockPickEngine;
+  constructor(difficulty, context) {
+    this.engine = new LockEngine(difficulty);
     this.context = context;
     // TODO: think about possible 'a'/'d' usage, but will have to
     //       introduce some mechanism that would prevent doubling

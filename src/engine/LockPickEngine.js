@@ -9,8 +9,9 @@
  * breaks and it isn't usable anymore.
  */
 class LockPickEngine {
-  constructor(difficulty) {
-    this.pickHealth === 100;
+  constructor(difficulty, healthChangeListener) {
+    // when the pickHealth.value changes, the listener is called
+    this.pickHealth = createNumberProxy(100, healthChangeListener);
     // TODO: based on difficulty create various types of lock durabilities
     this.damageFactor = 25;
   }
@@ -20,8 +21,9 @@ class LockPickEngine {
   }
 
   damageLockPick() {
-    if (this.pickHealth > 0) {
-      this.pickHealth -= this.damageFactor;
+    if (this.pickHealth.value > 0) {
+      this.pickHealth.value -= this.damageFactor;
     }
+    return this.pickHealth.value;
   }
 }

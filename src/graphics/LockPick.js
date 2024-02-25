@@ -6,8 +6,13 @@
  *           entity without an interactive mechanism.
  */
 class LockPick {
-  constructor(engine, context) {
+  constructor(difficulty, context) {
+    this.engine = new LockPickEngine(difficulty, this.updateLockPickHealth);
     this.context = context;
+  }
+
+  updateLockPickHealth(health) {
+    document.getElementById('lockpick-hp').innerHTML = health;
   }
 
   turnLockPick() {

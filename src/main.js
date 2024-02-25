@@ -7,8 +7,6 @@ window.onload = function () {
   const difficulty = Difficulty.easy;
   // TODO: make use of dynamic configuration
   const config = new Config(difficulty);
-  const engine = new LockEngine(difficulty);
-  const pickEngine = new LockPickEngine(difficulty);
-
-  const lock = new Lock(engine, pickEngine, canvas.getContext('2d'));
+  const lock = new Lock(difficulty, canvas.getContext('2d'));
+  const lockpick = new LockPick(difficulty, canvas.getContext('2d'));
 };

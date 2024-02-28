@@ -1,6 +1,7 @@
 class Config {
-  constructor(difficulty) {
+  constructor(difficulty, canvas) {
     this._difficulty = difficulty;
+    this._canvas = canvas;
   }
 
   set difficulty(difficulty) {
@@ -9,5 +10,13 @@ class Config {
 
   get difficulty() {
     return this._difficulty;
+  }
+
+  set canvas(canvas) {
+    this._canvas = canvas;
+  }
+
+  get canvas() {
+    return this._canvas;
   }
 }

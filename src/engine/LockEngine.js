@@ -32,6 +32,7 @@ class LockEngine {
     // TODO: create a more sophisticated algorithm or find suitable values for each difficulty
     this.tolerance = 2;
     this.pickingProgress = 0;
+    this._isSolved = false;
 
     switch (difficulty) {
       default: {
@@ -52,10 +53,16 @@ class LockEngine {
 
   pickLock() {
     // user tries to pick the lock
+    this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
+    if (this.pickingProgress === 100) {
+      this._isSolved = true;
+    }
   }
 
   revert() {
     // user stopped picking, revert lock position if necessary
+
+    this.pickingProgress = Math.max(this.pickingProgress - 5, 0);
   }
 
   isLockPickStuck() {
@@ -63,7 +70,11 @@ class LockEngine {
   }
 
   isSolved() {
-    return this.pickingProgress === 100;
+    return this._isSolved;
+  }
+
+  getPickingProgress() {
+    return this.pickingProgress;
   }
 
   getChambersCount() {
@@ -88,6 +99,6 @@ class LockEngine {
   }
 
   selectRandomChamber(chambersCount) {
-    return;
+    return Math.trunc(Math.random() * chambersCount);
   }
 }

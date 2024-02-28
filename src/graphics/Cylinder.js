@@ -2,22 +2,11 @@ class Cylinder {
   constructor(difficulty, context) {
     this.engine = new LockEngine(difficulty);
     this.context = context;
-    // TODO: think about possible 'a'/'d' usage, but will have to
-    //       introduce some mechanism that would prevent doubling
-    //       of action (e.g. pressing 'a' and then 'd' at the same time)
-    this.allowedKeys = ['e'];
     this.image = document.getElementById('keyhole-img');
-
-    document.onkeydown = (ev) => {
-      if (this.isKeyAllowed(ev.key)) {
-        this.pickTheLock();
-      }
-    };
-    document.onkeyup = (ev) => {
-      if (this.isKeyAllowed(ev.key)) {
-        this.stopPickingTheLock();
-      }
-    };
+    this.cylinderRadius = 200;
+    this.startAngle = 0;
+    this.endAngle = 90;
+    this.revertLockTimeoutId = null;
   }
 
   /**
@@ -25,32 +14,62 @@ class Cylinder {
    * partial success.
    */
   pickTheLock() {
-    console.log('picking lock');
+    this.stopRevertAnimation();
+    this.engine.pickLock();
   }
 
   /**
-   * When stopping on a
+   * When stopping when picking a lock the cylinder
+   * slowly moves back to the initial position.
+   * Returns picking progress in percentage to w
    */
   stopPickingTheLock() {
     if (this.engine.isSolved()) {
       // don't revert the lock if we solved it
+      console.log('Not reverting, lock is solved');
       return;
     }
 
+    if (this.revertLockTimeoutId === null) {
+      this.revertLock();
+    }
+  }
+
+  revertLock() {
     this.engine.revert();
-    console.log('reverting lock to initial position');
-  }
-
-  isKeyAllowed(key) {
-    return this.allowedKeys.includes(key);
-  }
-
-  draw() {
-    if (!this.image) {
-      console.log('image not yet loaded', this.image);
-      return;
+    if (this.engine.getPickingProgress() === 0) {
+      this.stopRevertAnimation();
     }
+    this.revertLockTimeoutId = setTimeout(this.revertLock.bind(this), 60);
+  }
 
-    this.context.drawImage(this.image, 0, 0, 200, 200);
+  stopRevertAnimation() {
+    clearTimeout(this.revertLockTimeoutId);
+    this.revertLockTimeoutId = null;
+  }
+
+  draw(centerX, centerY) {
+    const pickingProgress = this.engine.getPickingProgress();
+    const progress = pickingProgress / 100;
+    this.context.save();
+    const angle = this.getRadian(this.interpolate(progress));
+    this.context.translate(centerX, centerY);
+    this.context.rotate(angle);
+    this.context.drawImage(
+      this.image,
+      -this.cylinderRadius / 2,
+      -this.cylinderRadius / 2,
+      this.cylinderRadius,
+      this.cylinderRadius
+    );
+    this.context.restore();
+  }
+
+  getRadian(angle) {
+    return (angle * Math.PI) / 180;
+  }
+
+  interpolate(progress) {
+    return this.endAngle * progress + this.startAngle * (1 - progress);
   }
 }

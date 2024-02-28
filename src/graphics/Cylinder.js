@@ -1,60 +1,31 @@
 class Cylinder {
-  constructor(difficulty, context) {
-    this.engine = new LockEngine(difficulty);
+  constructor(centerPosition, context) {
+    this.centerPosition = centerPosition;
     this.context = context;
     this.image = document.getElementById('keyhole-img');
     this.cylinderRadius = 200;
+    this.rotationInRadians = 0;
     this.startAngle = 0;
     this.endAngle = 90;
-    this.revertLockTimeoutId = null;
   }
 
   /**
-   * @returns True if the lock is opened. False otherwise, may indicate
-   * partial success.
+   * Calculate the amount of rotation needed for a specific
+   * picking progress. This will then be used when drawing
+   * the cylinder.
+   * This can be used either for opening or reverting the lock.
    */
-  pickTheLock() {
-    this.stopRevertAnimation();
-    this.engine.pickLock();
-  }
-
-  /**
-   * When stopping when picking a lock the cylinder
-   * slowly moves back to the initial position.
-   * Returns picking progress in percentage to w
-   */
-  stopPickingTheLock() {
-    if (this.engine.isSolved()) {
-      // don't revert the lock if we solved it
-      console.log('Not reverting, lock is solved');
-      return;
-    }
-
-    if (this.revertLockTimeoutId === null) {
-      this.revertLock();
-    }
-  }
-
-  revertLock() {
-    this.engine.revert();
-    if (this.engine.getPickingProgress() === 0) {
-      this.stopRevertAnimation();
-    }
-    this.revertLockTimeoutId = setTimeout(this.revertLock.bind(this), 60);
-  }
-
-  stopRevertAnimation() {
-    clearTimeout(this.revertLockTimeoutId);
-    this.revertLockTimeoutId = null;
-  }
-
-  draw(centerX, centerY) {
-    const pickingProgress = this.engine.getPickingProgress();
+  calculateCylinderRotation(pickingProgress) {
     const progress = pickingProgress / 100;
+    this.rotationInRadians = toRadians(
+      lerp(this.endAngle, this.startAngle, progress)
+    );
+  }
+
+  draw() {
     this.context.save();
-    const angle = this.getRadian(this.interpolate(progress));
-    this.context.translate(centerX, centerY);
-    this.context.rotate(angle);
+    this.context.translate(this.centerPosition.x, this.centerPosition.y);
+    this.context.rotate(this.rotationInRadians);
     this.context.drawImage(
       this.image,
       -this.cylinderRadius / 2,
@@ -63,13 +34,5 @@ class Cylinder {
       this.cylinderRadius
     );
     this.context.restore();
-  }
-
-  getRadian(angle) {
-    return (angle * Math.PI) / 180;
-  }
-
-  interpolate(progress) {
-    return this.endAngle * progress + this.startAngle * (1 - progress);
   }
 }

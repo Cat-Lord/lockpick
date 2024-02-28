@@ -51,17 +51,20 @@ class LockEngine {
     this.correctChamber = this.selectRandomChamber(this.chambersCount);
   }
 
+  // user tries to pick the lock
   pickLock() {
-    // user tries to pick the lock
-    this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
     if (this.pickingProgress === 100) {
       this._isSolved = true;
+      return;
     }
+    this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
   }
 
-  revert() {
-    // user stopped picking, revert lock position if necessary
-
+  // user stopped picking, revert lock position if necessary
+  revertLock() {
+    if (this._isSolved) {
+      return;
+    }
     this.pickingProgress = Math.max(this.pickingProgress - 5, 0);
   }
 

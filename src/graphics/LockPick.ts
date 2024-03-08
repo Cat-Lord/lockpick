@@ -1,5 +1,6 @@
 import { Difficulties } from '../constants/Difficulty';
 import { LockPickEngine } from '../engine/LockPickEngine';
+import { lerp, toRadians } from '../engine/MathUtils';
 import { Position } from './Position';
 
 /**
@@ -19,8 +20,6 @@ export class LockPick {
     difficulty: Difficulties,
     private readonly context: CanvasRenderingContext2D
   ) {
-    this.engine = new LockPickEngine(difficulty, this.updateLockPickHealth);
-    this.context = context;
     this.rotationRadians = 0;
     const hpElement = document.getElementById('lockpick-hp');
     if (hpElement === null) {
@@ -29,6 +28,11 @@ export class LockPick {
       );
     }
     this.lockPickHpElement = hpElement;
+    // call after assigning lockpick element :)
+    this.engine = new LockPickEngine(
+      difficulty,
+      this.updateLockPickHealth.bind(this)
+    );
 
     document.onmousemove = (ev) => this.rotateLockPick(ev);
   }

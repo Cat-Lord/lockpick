@@ -1,8 +1,23 @@
-class Cylinder {
-  constructor(centerPosition, context) {
-    this.centerPosition = centerPosition;
-    this.context = context;
-    this.image = document.getElementById('keyhole-img');
+import { Position } from './Position';
+
+export class Cylinder {
+  private readonly image: HTMLImageElement;
+  private readonly cylinderRadius: number;
+  private readonly startAngle: number;
+  private readonly endAngle: number;
+  private rotationInRadians: number;
+
+  constructor(
+    private readonly centerPosition: Position,
+    private readonly context: CanvasRenderingContext2D
+  ) {
+    const imageElement = document.getElementById(
+      'keyhole-img'
+    ) as HTMLImageElement | null;
+    if (imageElement === null) {
+      throw new Error('Unable to find lock image');
+    }
+    this.image = imageElement;
     this.cylinderRadius = 200;
     this.rotationInRadians = 0;
     this.startAngle = 0;
@@ -15,7 +30,7 @@ class Cylinder {
    * the cylinder.
    * This can be used either for opening or reverting the lock.
    */
-  calculateCylinderRotation(pickingProgress) {
+  calculateCylinderRotation(pickingProgress: number) {
     const progress = pickingProgress / 100;
     this.rotationInRadians = toRadians(
       lerp(this.endAngle, this.startAngle, progress)

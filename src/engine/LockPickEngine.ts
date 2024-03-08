@@ -1,3 +1,6 @@
+import { Difficulties } from '../constants/Difficulty';
+import { createProxy } from './createNumberProxy';
+
 /**
  * Engine of a lock pick. A lock pick has health and
  * base damage factor. When a lock is pushed against
@@ -8,10 +11,16 @@
  * If the lock pick health reaches 0, the lock pick
  * breaks and it isn't usable anymore.
  */
-class LockPickEngine {
-  constructor(difficulty, healthChangeListener) {
+export class LockPickEngine {
+  private readonly pickHealth: any; // TODO: minor requirement, make the type prettier
+  private readonly damageFactor: number;
+
+  constructor(
+    difficulty: Difficulties,
+    healthChangeListener: (health: number) => void
+  ) {
     // when the pickHealth.value changes, the listener is called
-    this.pickHealth = createNumberProxy(100, healthChangeListener);
+    this.pickHealth = createProxy(100, healthChangeListener);
     // TODO: based on difficulty create various types of lock durabilities
     this.damageFactor = 25;
   }

@@ -1,35 +1,52 @@
+import { Config } from '../Config';
+import { LockEngine } from '../engine/LockEngine';
+import { Cylinder } from './Cylinder';
+import { LockPick } from './LockPick';
+import { Position } from './Position';
+
 /**
  * Represents the whole lock with cylinder and lock pick.
  */
-class Lock {
-  constructor(config, context) {
-    this.context = context;
+export class Lock {
+  private canvas: HTMLCanvasElement;
+  private lockEngine: LockEngine;
+  private cylinder: Cylinder;
+  private lockPick: LockPick;
+  private allowedKeys: [string];
+  private lockPickingActionId: NodeJS.Timeout | undefined;
+  private lockRevertActionId: NodeJS.Timeout | undefined;
+
+  constructor(
+    private readonly config: Config,
+    private readonly context: CanvasRenderingContext2D
+  ) {
     this.canvas = config.canvas;
     this.lockEngine = new LockEngine(config.difficulty);
-    this.cylinder = new Cylinder(
-      new Position(this.canvas.width / 2, this.canvas.height / 2),
-      context
+    const centerPosition = new Position(
+      this.canvas.width / 2,
+      this.canvas.height / 2
     );
-    this.lockpick = new LockPick(config.difficulty, context);
+    this.cylinder = new Cylinder(centerPosition, context);
+    this.lockPick = new LockPick(centerPosition, config.difficulty, context);
     // TODO: think about possible 'a'/'d' usage, but will have to
     //       introduce some mechanism that would prevent doubling
     //       of action (e.g. pressing 'a' and then 'd' at the same time)
     this.allowedKeys = ['e'];
-    this.lockPickingActionId = null;
-    this.lockRevertActionId = null;
+    this.lockPickingActionId = undefined;
+    this.lockRevertActionId = undefined;
 
     document.onkeydown = (ev) => this.startLockPicking(ev.key);
     document.onkeyup = (ev) => this.stopLockPicking(ev.key);
   }
 
-  startLockPicking(key) {
+  startLockPicking(key: string) {
     if (!this.lockPickingActionId && this.isKeyAllowed(key)) {
       this.clearRevertTimeout();
       this.lockPickingActionId = this.reanimate(this.pickTheLock);
     }
   }
 
-  stopLockPicking(key) {
+  stopLockPicking(key: string) {
     if (!this.lockRevertActionId && this.isKeyAllowed(key)) {
       this.clearPickingTimeout();
       this.lockRevertActionId = this.reanimate(this.revertLock);
@@ -38,8 +55,6 @@ class Lock {
 
   pickTheLock() {
     this.lockEngine.pickLock();
-    console.log('Picking lock: ', this.lockEngine.getPickingProgress());
-
     this.cylinder.calculateCylinderRotation(
       this.lockEngine.getPickingProgress()
     );
@@ -49,8 +64,6 @@ class Lock {
 
   revertLock() {
     this.lockEngine.revertLock();
-    console.log('Reverting lock: ', this.lockEngine.getPickingProgress());
-
     this.cylinder.calculateCylinderRotation(
       this.lockEngine.getPickingProgress()
     );
@@ -62,23 +75,26 @@ class Lock {
   draw() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.cylinder.draw();
+    // this.context.save();
+    // this.context.(0, 0, this.canvas.width, this.canvas.height);
+    this.lockPick.draw();
   }
 
-  reanimate(callback) {
+  reanimate(callback: () => any): NodeJS.Timeout {
     return setTimeout(callback.bind(this), 100);
   }
 
   clearPickingTimeout() {
     clearTimeout(this.lockPickingActionId);
-    this.lockPickingActionId = null;
+    this.lockPickingActionId = undefined;
   }
 
   clearRevertTimeout() {
     clearTimeout(this.lockRevertActionId);
-    this.lockRevertActionId = null;
+    this.lockRevertActionId = undefined;
   }
 
-  isKeyAllowed(key) {
+  isKeyAllowed(key: string) {
     return this.allowedKeys.includes(key);
   }
 }

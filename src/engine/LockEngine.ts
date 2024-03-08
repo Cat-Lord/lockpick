@@ -1,3 +1,5 @@
+import { Difficulties } from '../constants/Difficulty';
+
 /**
  * This class represents the inner workings of a lock.
  *
@@ -27,34 +29,26 @@
  * is in its initial state, 100 meaning the lock has been open (can be
  * viewed as percentage).
  */
-class LockEngine {
-  constructor(difficulty) {
+export class LockEngine {
+  private readonly tolerance: number;
+  private readonly correctChamber: number;
+  private pickingProgress: number;
+  private chambersCount: number;
+  public isSolved = false;
+
+  constructor(difficulty: Difficulties) {
     // TODO: create a more sophisticated algorithm or find suitable values for each difficulty
     this.tolerance = 2;
     this.pickingProgress = 0;
-    this._isSolved = false;
 
-    switch (difficulty) {
-      default: {
-        this.chambersCount = 10;
-      }
-      // TODO: after testing set the most fitting values.
-      // case difficulty.easy:
-      //   break;
-      // case difficulty.medium:
-      //   break;
-      // case difficulty.hard:
-      //   break;
-      // case difficulty.veryHard:
-      //   break;
-    }
+    this.chambersCount = this.generateChambersCount(difficulty);
     this.correctChamber = this.selectRandomChamber(this.chambersCount);
   }
 
   // user tries to pick the lock
   pickLock() {
     if (this.pickingProgress === 100) {
-      this._isSolved = true;
+      this.isSolved = true;
       return;
     }
     this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
@@ -62,7 +56,7 @@ class LockEngine {
 
   // user stopped picking, revert lock position if necessary
   revertLock() {
-    if (this._isSolved) {
+    if (this.isSolved) {
       return;
     }
     this.pickingProgress = Math.max(this.pickingProgress - 5, 0);
@@ -70,10 +64,6 @@ class LockEngine {
 
   isLockPickStuck() {
     // return true if the lock pick is unable to move further
-  }
-
-  isSolved() {
-    return this._isSolved;
   }
 
   getPickingProgress() {
@@ -91,7 +81,7 @@ class LockEngine {
    * @returns -1 if the distance from the correct chamber is NOT within the tolerance
    *          range. Otherwise, returns the distance to the correct chamber.
    */
-  isWithinTolerance(selection) {
+  isWithinTolerance(selection: number) {
     const distanceFromCorrectChamber = Math.abs(
       this.correctChamber - selection
     );
@@ -101,7 +91,24 @@ class LockEngine {
     return -1;
   }
 
-  selectRandomChamber(chambersCount) {
+  private generateChambersCount(difficulty: Difficulties) {
+    switch (difficulty) {
+      default: {
+        return 10;
+      }
+      // TODO: after testing set the most fitting values.
+      // case difficulty.easy:
+      //   break;
+      // case difficulty.medium:
+      //   break;
+      // case difficulty.hard:
+      //   break;
+      // case difficulty.veryHard:
+      //   break;
+    }
+  }
+
+  private selectRandomChamber(chambersCount: number) {
     return Math.trunc(Math.random() * chambersCount);
   }
 }

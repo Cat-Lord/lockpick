@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base href="./" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skyrim Lockpick</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <script type="module" src="main.ts" async defer></script>
+  </head>
+  <body>
+    <img
+      id="keyhole-img"
+      src="./img/keyhole.png"
+      hidden
+      crossorigin="anonymous"
+    />
+    <div id="container">
+      <canvas id="canvas" width="800" height="800"></canvas>
+      <div id="stats">
+        <div>
+          <p>Lockpick HP: <span id="lockpick-hp"></span></p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,14 +2,19 @@
   "name": "lockpick",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "tsc"
+    "parcel": "parcel src/index.html",
+    "build": "parcel build src/index.html",
+    "serve-build": "http-server dist"
   },
   "author": "cat-lord",
   "license": "ISC",
   "dependencies": {
+    "http-server": "^14.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.2"
+  },
+  "devDependencies": {
+    "parcel": "^2.12.0"
   }
 }

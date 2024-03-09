@@ -1,6 +1,6 @@
 import { Config } from '../Config';
 import { LockPickEngine } from '../engine/LockPickEngine';
-import { lerp, toRadians } from '../engine/MathUtils';
+import { constrain, lerp, toRadians } from '../engine/MathUtils';
 
 /**
  * Simple visual representation of the lock pick. Consists of
@@ -67,9 +67,7 @@ export class LockPick {
 
   rotateLockPick(ev: MouseEvent) {
     let mouseX = ev.clientX - this.config.canvas.offsetLeft;
-    const minX = this.config.canvas.offsetLeft;
-    mouseX = Math.max(mouseX, 0);
-    mouseX = Math.min(mouseX, this.config.canvas.clientWidth);
+    mouseX = constrain(mouseX, 0, this.config.canvas.clientWidth);
     const normalizedMouseX = mouseX / this.config.canvas.clientWidth;
 
     const rotationAngle = lerp(
@@ -77,10 +75,7 @@ export class LockPick {
       0 - this.config.lockpickMovementSensitivity,
       normalizedMouseX
     );
-    this.rotationRadians = toRadians(rotationAngle);
-    console.log('norm x | angle', normalizedMouseX, this.rotationRadians);
-    this.rotationRadians = Math.min(this.rotationRadians, Math.PI);
-    this.rotationRadians = Math.max(this.rotationRadians, 0);
+    this.rotationRadians = constrain(toRadians(rotationAngle), 0, Math.PI);
   }
 
   draw() {

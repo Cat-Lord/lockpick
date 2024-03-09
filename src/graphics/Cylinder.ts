@@ -1,4 +1,4 @@
-import { Position } from './Position';
+import { lerp, toRadians } from '../engine/MathUtils';
 
 export class Cylinder {
   private readonly image: HTMLImageElement;
@@ -7,10 +7,7 @@ export class Cylinder {
   private readonly endAngle: number;
   private rotationInRadians: number;
 
-  constructor(
-    private readonly centerPosition: Position,
-    private readonly context: CanvasRenderingContext2D
-  ) {
+  constructor(private readonly context: CanvasRenderingContext2D) {
     const imageElement = document.getElementById(
       'keyhole-img'
     ) as HTMLImageElement | null;
@@ -18,7 +15,7 @@ export class Cylinder {
       throw new Error('Unable to find lock image');
     }
     this.image = imageElement;
-    this.cylinderRadius = 200;
+    this.cylinderRadius = 250;
     this.rotationInRadians = 0;
     this.startAngle = 0;
     this.endAngle = 90;
@@ -39,7 +36,6 @@ export class Cylinder {
 
   draw() {
     this.context.save();
-    this.context.translate(this.centerPosition.x, this.centerPosition.y);
     this.context.rotate(this.rotationInRadians);
     this.context.drawImage(
       this.image,

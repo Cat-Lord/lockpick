@@ -2,7 +2,6 @@ import { Config } from '../Config';
 import { LockEngine } from '../engine/LockEngine';
 import { Cylinder } from './Cylinder';
 import { LockPick } from './LockPick';
-import { Position } from './Position';
 
 /**
  * Represents the whole lock with cylinder and lock pick.
@@ -22,12 +21,8 @@ export class Lock {
   ) {
     this.canvas = config.canvas;
     this.lockEngine = new LockEngine(config.difficulty);
-    const centerPosition = new Position(
-      this.canvas.width / 2,
-      this.canvas.height / 2
-    );
-    this.cylinder = new Cylinder(centerPosition, context);
-    this.lockPick = new LockPick(centerPosition, config.difficulty, context);
+    this.cylinder = new Cylinder(context);
+    this.lockPick = new LockPick(config, context);
     // TODO: think about possible 'a'/'d' usage, but will have to
     //       introduce some mechanism that would prevent doubling
     //       of action (e.g. pressing 'a' and then 'd' at the same time)
@@ -74,10 +69,11 @@ export class Lock {
 
   draw() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.save();
+    this.context.translate(this.canvas.width / 2, this.canvas.height / 2);
     this.cylinder.draw();
-    // this.context.save();
-    // this.context.(0, 0, this.canvas.width, this.canvas.height);
     this.lockPick.draw();
+    this.context.restore();
   }
 
   reanimate(callback: () => any): NodeJS.Timeout {

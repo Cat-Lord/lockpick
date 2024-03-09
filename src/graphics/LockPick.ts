@@ -1,7 +1,6 @@
-import { Difficulties } from '../constants/Difficulty';
+import { Config } from '../Config';
 import { LockPickEngine } from '../engine/LockPickEngine';
 import { lerp, toRadians } from '../engine/MathUtils';
-import { Position } from './Position';
 
 /**
  * Simple visual representation of the lock pick. Consists of
@@ -13,14 +12,15 @@ import { Position } from './Position';
 export class LockPick {
   private readonly engine: LockPickEngine;
   private readonly lockPickHpElement: HTMLElement;
+  private readonly image: HTMLImageElement;
+  private readonly scaledImageW: number;
+  private readonly scaledImageH: number;
   private rotationRadians: number;
 
   constructor(
-    private readonly centerPosition: Position,
-    difficulty: Difficulties,
+    private readonly config: Config,
     private readonly context: CanvasRenderingContext2D
   ) {
-    this.rotationRadians = 0;
     const hpElement = document.getElementById('lockpick-hp');
     if (hpElement === null) {
       throw new Error(
@@ -28,9 +28,19 @@ export class LockPick {
       );
     }
     this.lockPickHpElement = hpElement;
+    const imageElement = document.getElementById(
+      'lockpick-img'
+    ) as HTMLImageElement | null;
+    if (imageElement === null) {
+      throw new Error('Unable to find lock image');
+    }
+    this.rotationRadians = 0;
+    this.image = imageElement;
+    this.scaledImageW = this.image.width / 2;
+    this.scaledImageH = this.image.height / 2;
     // call after assigning lockpick element :)
     this.engine = new LockPickEngine(
-      difficulty,
+      config.difficulty,
       this.updateLockPickHealth.bind(this)
     );
 
@@ -56,54 +66,34 @@ export class LockPick {
   }
 
   rotateLockPick(ev: MouseEvent) {
-    const canvas = document.getElementById('canvas');
-    if (canvas === null) {
-      throw new Error("Canvas wasn't found!");
-    }
-    let mouseX = ev.clientX - canvas.offsetLeft;
+    let mouseX = ev.clientX - this.config.canvas.offsetLeft;
+    const minX = this.config.canvas.offsetLeft;
+    mouseX = Math.max(mouseX, 0);
+    mouseX = Math.min(mouseX, this.config.canvas.clientWidth);
+    const normalizedMouseX = mouseX / this.config.canvas.clientWidth;
 
-    const minX = canvas.offsetLeft;
-    const maxX = minX + canvas.clientWidth;
-    mouseX = Math.max(mouseX, minX);
-    mouseX = Math.min(mouseX, maxX);
-    const normalizedMouseX = mouseX / canvas.clientWidth;
-    const rotationAngle = lerp(180, 0, normalizedMouseX);
+    const rotationAngle = lerp(
+      180 + this.config.lockpickMovementSensitivity,
+      0 - this.config.lockpickMovementSensitivity,
+      normalizedMouseX
+    );
     this.rotationRadians = toRadians(rotationAngle);
-    console.log(`rotate by ${rotationAngle} (${this.rotationRadians} radians)`);
+    console.log('norm x | angle', normalizedMouseX, this.rotationRadians);
+    this.rotationRadians = Math.min(this.rotationRadians, Math.PI);
+    this.rotationRadians = Math.max(this.rotationRadians, 0);
   }
 
   draw() {
     this.context.save();
-    this.context.translate(0, -25);
-
-    // TODO: rotation center is off, seems like it's the point [0,0]
-    this.context.rotate(-Math.PI + this.rotationRadians);
-
-    this.context.strokeStyle = 'blue';
-    this.context.lineWidth = 5;
-    this.context.beginPath();
-    this.context.lineTo(this.centerPosition.x, this.centerPosition.y);
-    this.context.lineTo(this.centerPosition.x, 5 + this.centerPosition.y);
-    this.context.lineTo(65 + this.centerPosition.x, 10 + this.centerPosition.y);
-    this.context.lineTo(
-      75 + this.centerPosition.x,
-      125 + this.centerPosition.y
+    this.context.rotate(this.rotationRadians);
+    this.context.translate(-this.scaledImageW, -this.scaledImageH / 2);
+    this.context.drawImage(
+      this.image,
+      0,
+      0,
+      this.scaledImageW,
+      this.scaledImageH
     );
-    this.context.lineTo(
-      55 + this.centerPosition.x,
-      350 + this.centerPosition.y
-    );
-    this.context.lineTo(
-      95 + this.centerPosition.x,
-      350 + this.centerPosition.y
-    );
-    this.context.lineTo(
-      95 + this.centerPosition.x,
-      125 + this.centerPosition.y
-    );
-    this.context.lineTo(75 + this.centerPosition.x, this.centerPosition.y);
-    this.context.closePath();
-    this.context.stroke();
     this.context.restore();
   }
 }

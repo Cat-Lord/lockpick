@@ -43,15 +43,49 @@ export class LockEngine {
 
     this.chambersCount = this.generateChambersCount(difficulty);
     this.correctChamber = this.selectRandomChamber(this.chambersCount);
+    console.log(
+      `Lock Engine: created ${this.chambersCount} with correct lock ${this.correctChamber}`
+    );
   }
 
   // user tries to pick the lock
-  pickLock() {
+  pickLock(selectedChamber: number) {
     if (this.pickingProgress === 100) {
       this.isSolved = true;
       return;
     }
-    this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
+
+    if (this.isWithinTolerance(selectedChamber)) {
+      this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
+      const maxAllowedProgress =
+        this.getMaxAllowedProgressBasedOnProximity(selectedChamber);
+      console.log(
+        `selectedChamber ${selectedChamber} max allowed progress`,
+        maxAllowedProgress
+      );
+      this.pickingProgress = Math.min(this.pickingProgress, maxAllowedProgress);
+    }
+  }
+
+  /* 
+    If we are close to the correct chamber, we are allowed a
+    partial rotation. This function determines the max limit
+    of the picking progress based on how distant are we from
+    the solution.
+   */
+  private getMaxAllowedProgressBasedOnProximity(selectedChamber: number) {
+    // calculate distance between selected chamber and correct chamber
+    if (this.isWithinTolerance(selectedChamber) === false) {
+      return 0;
+    }
+
+    const distanceFromCorrectChamber = Math.abs(
+      this.correctChamber - selectedChamber
+    );
+    // TODO: come up maybe with a function
+    const maxAllowedProgress = 100 - distanceFromCorrectChamber * 35;
+    // 100 / tolerance * 1.25
+    return maxAllowedProgress;
   }
 
   // user stopped picking, revert lock position if necessary
@@ -85,10 +119,7 @@ export class LockEngine {
     const distanceFromCorrectChamber = Math.abs(
       this.correctChamber - selection
     );
-    if (distanceFromCorrectChamber <= this.tolerance) {
-      return distanceFromCorrectChamber;
-    }
-    return -1;
+    return distanceFromCorrectChamber <= this.tolerance;
   }
 
   private generateChambersCount(difficulty: Difficulties) {

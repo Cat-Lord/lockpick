@@ -43,8 +43,6 @@ export class LockPick {
       config.difficulty,
       this.updateLockPickHealth.bind(this)
     );
-
-    document.onmousemove = (ev) => this.rotateLockPick(ev);
   }
 
   updateLockPickHealth(health: number) {
@@ -65,9 +63,7 @@ export class LockPick {
     // play the sound of the lock breaking
   }
 
-  rotateLockPick(ev: MouseEvent) {
-    let mouseX = ev.clientX - this.config.canvas.offsetLeft;
-    mouseX = constrain(mouseX, 0, this.config.canvas.clientWidth);
+  rotateLockPick(mouseX: number) {
     const normalizedMouseX = mouseX / this.config.canvas.clientWidth;
 
     const rotationAngle = lerp(
@@ -76,6 +72,10 @@ export class LockPick {
       normalizedMouseX
     );
     this.rotationRadians = constrain(toRadians(rotationAngle), 0, Math.PI);
+  }
+
+  getRotationRadians() {
+    return this.rotationRadians;
   }
 
   draw() {

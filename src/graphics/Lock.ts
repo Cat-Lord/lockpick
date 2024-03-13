@@ -1,5 +1,6 @@
 import { Config } from '../Config';
 import { LockEngine } from '../engine/LockEngine';
+import { constrain } from '../engine/MathUtils';
 import { Cylinder } from './Cylinder';
 import { LockPick } from './LockPick';
 
@@ -32,29 +33,58 @@ export class Lock {
 
     document.onkeydown = (ev) => this.startLockPicking(ev.key);
     document.onkeyup = (ev) => this.stopLockPicking(ev.key);
+    document.onmousemove = (ev) => this.rotateLockPick(ev);
   }
 
   startLockPicking(key: string) {
-    if (!this.lockPickingActionId && this.isKeyAllowed(key)) {
+    if (
+      !this.lockPickingActionId &&
+      this.isKeyAllowed(key) &&
+      this.lockEngine.isSolved === false
+    ) {
       this.clearRevertTimeout();
       this.lockPickingActionId = this.reanimate(this.pickTheLock);
     }
   }
 
   stopLockPicking(key: string) {
-    if (!this.lockRevertActionId && this.isKeyAllowed(key)) {
+    if (
+      !this.lockRevertActionId &&
+      this.isKeyAllowed(key) &&
+      this.lockEngine.isSolved === false
+    ) {
       this.clearPickingTimeout();
       this.lockRevertActionId = this.reanimate(this.revertLock);
     }
   }
 
+  rotateLockPick(ev: MouseEvent) {
+    const mouseX = ev.clientX - this.canvas.offsetLeft;
+    const canvasMouseX = constrain(mouseX, 0, this.config.canvas.clientWidth);
+    this.lockPick.rotateLockPick(canvasMouseX);
+  }
+
   pickTheLock() {
-    this.lockEngine.pickLock();
-    this.cylinder.calculateCylinderRotation(
-      this.lockEngine.getPickingProgress()
+    if (this.lockEngine.isSolved) {
+      this.clearPickingTimeout();
+      return;
+    }
+
+    const rotationRadians = this.lockPick.getRotationRadians();
+    const roundedRotationRadians = Number(rotationRadians.toFixed(2));
+    const selectedChamber = this.getCurrentlyPickedChamber(
+      roundedRotationRadians
     );
 
-    this.lockPickingActionId = this.reanimate(this.pickTheLock.bind(this));
+    if (this.lockEngine.isWithinTolerance(selectedChamber)) {
+      this.lockEngine.pickLock(selectedChamber);
+      this.cylinder.calculateCylinderRotation(
+        this.lockEngine.getPickingProgress()
+      );
+    } else {
+      console.log(`selectedChamber ${selectedChamber} not even in tolerance`);
+    }
+    this.lockPickingActionId = this.reanimate(this.pickTheLock);
   }
 
   revertLock() {
@@ -63,7 +93,7 @@ export class Lock {
       this.lockEngine.getPickingProgress()
     );
     if (this.lockEngine.getPickingProgress() > 0) {
-      this.lockRevertActionId = this.reanimate(this.revertLock.bind(this));
+      this.lockRevertActionId = this.reanimate(this.revertLock);
     }
   }
 
@@ -76,21 +106,28 @@ export class Lock {
     this.context.restore();
   }
 
-  reanimate(callback: () => any): NodeJS.Timeout {
-    return setTimeout(callback.bind(this), 100);
+  // Split the interval [0, Math.PI] into equal parts and determine
+  // to which part belongs the current picking angle
+  private getCurrentlyPickedChamber(rotationRadians: number) {
+    const singleChamberIncrement = Math.PI / this.lockEngine.getChambersCount();
+    return Math.floor(rotationRadians / singleChamberIncrement) + 1;
   }
 
-  clearPickingTimeout() {
+  private reanimate(callback: () => any): NodeJS.Timeout {
+    return setTimeout(callback.bind(this), 50);
+  }
+
+  private clearPickingTimeout() {
     clearTimeout(this.lockPickingActionId);
     this.lockPickingActionId = undefined;
   }
 
-  clearRevertTimeout() {
+  private clearRevertTimeout() {
     clearTimeout(this.lockRevertActionId);
     this.lockRevertActionId = undefined;
   }
 
-  isKeyAllowed(key: string) {
+  private isKeyAllowed(key: string) {
     return this.allowedKeys.includes(key);
   }
 }

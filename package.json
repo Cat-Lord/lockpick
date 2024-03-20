@@ -10,11 +10,10 @@
   "author": "cat-lord",
   "license": "ISC",
   "dependencies": {
-    "http-server": "^14.1.1",
-    "ts-node": "^10.9.2",
     "typescript": "^5.4.2"
   },
   "devDependencies": {
+    "http-server": "^14.1.1",
     "parcel": "^2.12.0"
   }
 }

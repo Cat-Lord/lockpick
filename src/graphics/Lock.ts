@@ -76,20 +76,18 @@ export class Lock {
       roundedRotationRadians
     );
 
-    if (this.lockEngine.isWithinTolerance(selectedChamber)) {
-      this.lockEngine.pickLock(selectedChamber);
-      this.cylinder.calculateCylinderRotation(
-        this.lockEngine.getPickingProgress()
-      );
-    } else {
-      console.log(`selectedChamber ${selectedChamber} not even in tolerance`);
+    const pickingProgress = this.lockEngine.pickLock(selectedChamber);
+    if (this.lockEngine.isStuck) {
+      this.lockPick.shake();
     }
+    this.cylinder.setRotationByPickingProgress(pickingProgress);
     this.lockPickingActionId = this.reanimate(this.pickTheLock);
   }
 
   revertLock() {
     this.lockEngine.revertLock();
-    this.cylinder.calculateCylinderRotation(
+    this.lockPick.stopShaking();
+    this.cylinder.setRotationByPickingProgress(
       this.lockEngine.getPickingProgress()
     );
     if (this.lockEngine.getPickingProgress() > 0) {

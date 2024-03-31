@@ -27,7 +27,7 @@ export class Cylinder {
    * the cylinder.
    * This can be used either for opening or reverting the lock.
    */
-  calculateCylinderRotation(pickingProgress: number) {
+  setRotationByPickingProgress(pickingProgress: number) {
     const progress = pickingProgress / 100;
     this.rotationInRadians = toRadians(
       lerp(this.endAngle, this.startAngle, progress)

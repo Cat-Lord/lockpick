@@ -34,6 +34,7 @@ export class LockEngine {
   private readonly correctChamber: number;
   private pickingProgress: number;
   private chambersCount: number;
+  public isStuck = false;
   public isSolved = false;
 
   constructor(difficulty: Difficulties) {
@@ -48,14 +49,10 @@ export class LockEngine {
     );
   }
 
-  // user tries to pick the lock
-  pickLock(selectedChamber: number) {
+  pickLock(selectedChamber: number): number {
     if (this.pickingProgress === 100) {
       this.isSolved = true;
-      return;
-    }
-
-    if (this.isWithinTolerance(selectedChamber)) {
+    } else if (this.isWithinTolerance(selectedChamber)) {
       this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
       const maxAllowedProgress =
         this.getMaxAllowedProgressBasedOnProximity(selectedChamber);
@@ -63,13 +60,21 @@ export class LockEngine {
         `selectedChamber ${selectedChamber} max allowed progress`,
         maxAllowedProgress
       );
+
+      // if we haven't solved yet but reached the rotation limit
+      this.isStuck =
+        maxAllowedProgress !== 100 &&
+        this.pickingProgress === maxAllowedProgress;
       this.pickingProgress = Math.min(this.pickingProgress, maxAllowedProgress);
+    } else {
+      this.isStuck = true;
     }
+    return this.pickingProgress;
   }
 
   /* 
     If we are close to the correct chamber, we are allowed a
-    partial rotation. This function determines the max limit
+    partial rotation. This function determines the maximal angle
     of the picking progress based on how distant are we from
     the solution.
    */
@@ -94,10 +99,6 @@ export class LockEngine {
       return;
     }
     this.pickingProgress = Math.max(this.pickingProgress - 5, 0);
-  }
-
-  isLockPickStuck() {
-    // return true if the lock pick is unable to move further
   }
 
   getPickingProgress() {

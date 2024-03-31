@@ -12,7 +12,9 @@ import { constrain, lerp, toRadians } from '../engine/MathUtils';
 export class LockPick {
   private readonly engine: LockPickEngine;
   private readonly lockPickHpElement: HTMLElement;
-  private readonly image: HTMLImageElement;
+  private lockpickImage: HTMLImageElement;
+  private readonly healthyLockpickImage: HTMLImageElement;
+  private readonly brokenLockpickImage: HTMLImageElement;
   private readonly scaledImageW: number;
   private readonly scaledImageH: number;
   private rotationRadians: number;
@@ -28,17 +30,13 @@ export class LockPick {
       );
     }
     this.lockPickHpElement = hpElement;
-    const imageElement = document.getElementById(
-      'lockpick-img'
-    ) as HTMLImageElement | null;
-    if (imageElement === null) {
-      throw new Error('Unable to find lock image');
-    }
+    this.lockPickHpElement = hpElement;
+    this.healthyLockpickImage = this.loadImage('lockpick-img');
+    this.brokenLockpickImage = this.loadImage('broken-lockpick-img');
+    this.lockpickImage = this.healthyLockpickImage; // changes based on lockpick health
     this.rotationRadians = 0;
-    this.image = imageElement;
-    this.scaledImageW = this.image.width / 2;
-    this.scaledImageH = this.image.height / 2;
-    // call after assigning lockpick element :)
+    this.scaledImageW = this.lockpickImage.width / 2;
+    this.scaledImageH = this.lockpickImage.height / 2;
     this.engine = new LockPickEngine(
       config.difficulty,
       this.updateLockPickHealth.bind(this)
@@ -47,15 +45,31 @@ export class LockPick {
 
   updateLockPickHealth(health: number) {
     this.lockPickHpElement.innerHTML = '' + health;
+    if (health === 0) {
+      this.lockpickImage = this.brokenLockpickImage;
+    }
   }
 
   turnLockPick() {
     // turn lock pick as the mouse moves around
   }
 
+  /*
+    TODO: temporary solution to debug
+
+    Shake to indicate incorrect selection.
+    Todo: Play the sound of the lock shaking
+  */
   shake() {
-    // shake to indicate incorrect selection
-    // play the sound of the lock shaking
+    this.lockpickImage = this.brokenLockpickImage;
+  }
+
+  // TODO: temporary solution to debug
+  /*
+    Reset shaking state.
+  */
+  stopShaking() {
+    this.lockpickImage = this.healthyLockpickImage;
   }
 
   break() {
@@ -67,6 +81,7 @@ export class LockPick {
     const normalizedMouseX = mouseX / this.config.canvas.clientWidth;
 
     const rotationAngle = lerp(
+      // needs to be reversed, TODO: maybe refactor later
       180 + this.config.lockpickMovementSensitivity,
       0 - this.config.lockpickMovementSensitivity,
       normalizedMouseX
@@ -83,12 +98,22 @@ export class LockPick {
     this.context.rotate(this.rotationRadians);
     this.context.translate(-this.scaledImageW, -this.scaledImageH / 2);
     this.context.drawImage(
-      this.image,
+      this.lockpickImage,
       0,
       0,
       this.scaledImageW,
       this.scaledImageH
     );
     this.context.restore();
+  }
+
+  private loadImage(imageName: string) {
+    const imageElement = document.getElementById(
+      imageName
+    ) as HTMLImageElement | null;
+    if (imageElement === null) {
+      throw new Error('Unable to find lock image');
+    }
+    return imageElement;
   }
 }

@@ -26,7 +26,7 @@ export class LockPickEngine {
   }
 
   isLockPickBroken() {
-    return this.pickHealth <= 0;
+    return this.pickHealth.value <= 0;
   }
 
   damageLockPick() {

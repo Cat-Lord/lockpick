@@ -18,6 +18,8 @@ export class LockPick {
   private readonly scaledImageW: number;
   private readonly scaledImageH: number;
   private rotationRadians: number;
+  private shakeIncrement: number;
+  private shakeAngle: number;
 
   constructor(
     private readonly config: Config,
@@ -35,6 +37,8 @@ export class LockPick {
     this.brokenLockpickImage = this.loadImage('broken-lockpick-img');
     this.lockpickImage = this.healthyLockpickImage; // changes based on lockpick health
     this.rotationRadians = 0;
+    this.shakeIncrement = 0;
+    this.shakeAngle = 0;
     this.scaledImageW = this.lockpickImage.width / 2;
     this.scaledImageH = this.lockpickImage.height / 2;
     this.engine = new LockPickEngine(
@@ -55,13 +59,19 @@ export class LockPick {
   }
 
   /*
-    TODO: temporary solution to debug
-
     Shake to indicate incorrect selection.
     Todo: Play the sound of the lock shaking
   */
   shake() {
-    this.lockpickImage = this.brokenLockpickImage;
+    this.engine.damageLockPick();
+
+    if (this.engine.isLockPickBroken()) {
+      this.lockpickImage = this.brokenLockpickImage;
+    }
+
+    // TODO: make this prettier
+    this.shakeIncrement += 10;
+    this.shakeAngle = Math.sin(this.shakeIncrement) / 20;
   }
 
   // TODO: temporary solution to debug
@@ -70,6 +80,8 @@ export class LockPick {
   */
   stopShaking() {
     this.lockpickImage = this.healthyLockpickImage;
+    this.shakeIncrement = 0;
+    this.shakeAngle = 0;
   }
 
   break() {
@@ -95,7 +107,9 @@ export class LockPick {
 
   draw() {
     this.context.save();
-    this.context.rotate(this.rotationRadians);
+    this.context.rotate(this.rotationRadians + this.shakeAngle);
+    console.log(this.shakeAngle);
+
     this.context.translate(-this.scaledImageW, -this.scaledImageH / 2);
     this.context.drawImage(
       this.lockpickImage,

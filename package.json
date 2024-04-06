@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "parcel": "parcel src/index.html",
-    "build": "parcel build src/index.html",
+    "build": "parcel build src/index.html --no-source-maps",
     "serve-build": "http-server dist"
   },
   "author": "cat-lord",

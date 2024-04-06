@@ -50,13 +50,13 @@ export class LockEngine {
     );
     this.pickingProgress = createProxy<number>(
       0,
-      (progress) => (this.lockPickHpElement.innerHTML = '' + progress)
+      (progress) => (this.lockPickHpElement.innerHTML = progress + '%')
     );
     this.maxAllowedProgress = createProxy<number>(
       0,
       (currentMaxAllowedProgress) =>
         (this.maxAllowedProgressElement.innerHTML =
-          '' + currentMaxAllowedProgress)
+          currentMaxAllowedProgress + '%')
     );
 
     this.chambersCount = this.generateChambersCount(difficulty);

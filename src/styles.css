@@ -17,11 +17,21 @@ body {
   font-size: 16pt;
   padding: 5px;
   border: 1px solid blue;
-  min-width: 200px;
+  min-width: 325px;
+}
+
+#stats > div * {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 canvas {
   position: relative;
   border: 1px solid ghostwhite;
   background-color: white;
+}
+
+.watched-value {
+  color: rgb(238, 226, 0);
 }

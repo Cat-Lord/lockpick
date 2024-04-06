@@ -1,4 +1,5 @@
 import { Difficulties } from '../constants/Difficulty';
+import { Proxy, createProxy } from './createNumberProxy';
 
 /**
  * This class represents the inner workings of a lock.
@@ -32,15 +33,31 @@ import { Difficulties } from '../constants/Difficulty';
 export class LockEngine {
   private readonly tolerance: number;
   private readonly correctChamber: number;
-  private pickingProgress: number;
+  private pickingProgress: Proxy<number>;
+  private maxAllowedProgress: Proxy<number>;
   private chambersCount: number;
+  private lockPickHpElement: HTMLElement;
+  private maxAllowedProgressElement: HTMLElement;
   public isStuck = false;
   public isSolved = false;
 
   constructor(difficulty: Difficulties) {
     // TODO: create a more sophisticated algorithm or find suitable values for each difficulty
     this.tolerance = 2;
-    this.pickingProgress = 0;
+    this.lockPickHpElement = this.loadHtmlElement('lock-progress');
+    this.maxAllowedProgressElement = this.loadHtmlElement(
+      'max-allowed-progress'
+    );
+    this.pickingProgress = createProxy<number>(
+      0,
+      (progress) => (this.lockPickHpElement.innerHTML = '' + progress)
+    );
+    this.maxAllowedProgress = createProxy<number>(
+      0,
+      (currentMaxAllowedProgress) =>
+        (this.maxAllowedProgressElement.innerHTML =
+          '' + currentMaxAllowedProgress)
+    );
 
     this.chambersCount = this.generateChambersCount(difficulty);
     this.correctChamber = this.selectRandomChamber(this.chambersCount);
@@ -50,26 +67,28 @@ export class LockEngine {
   }
 
   pickLock(selectedChamber: number): number {
-    if (this.pickingProgress === 100) {
+    if (this.pickingProgress.value === 100) {
       this.isSolved = true;
     } else if (this.isWithinTolerance(selectedChamber)) {
-      this.pickingProgress = Math.min(this.pickingProgress + 5, 100);
-      const maxAllowedProgress =
-        this.getMaxAllowedProgressBasedOnProximity(selectedChamber);
-      console.log(
-        `selectedChamber ${selectedChamber} max allowed progress`,
-        maxAllowedProgress
+      this.pickingProgress.value = Math.min(
+        this.pickingProgress.value + 5,
+        100
       );
+      this.maxAllowedProgress.value =
+        this.getMaxAllowedProgressBasedOnProximity(selectedChamber);
 
-      // if we haven't solved yet but reached the rotation limit
+      // if we haven't solved yet but stepped over the rotation limit
       this.isStuck =
-        maxAllowedProgress !== 100 &&
-        this.pickingProgress === maxAllowedProgress;
-      this.pickingProgress = Math.min(this.pickingProgress, maxAllowedProgress);
+        this.maxAllowedProgress.value !== 100 &&
+        this.pickingProgress.value >= this.maxAllowedProgress.value;
+      this.pickingProgress.value = Math.min(
+        this.pickingProgress.value,
+        this.maxAllowedProgress.value
+      );
     } else {
       this.isStuck = true;
     }
-    return this.pickingProgress;
+    return this.pickingProgress.value;
   }
 
   /* 
@@ -98,11 +117,12 @@ export class LockEngine {
     if (this.isSolved) {
       return;
     }
-    this.pickingProgress = Math.max(this.pickingProgress - 5, 0);
+    this.pickingProgress.value = Math.max(this.pickingProgress.value - 5, 0);
+    this.maxAllowedProgress.value = 0;
   }
 
   getPickingProgress() {
-    return this.pickingProgress;
+    return this.pickingProgress.value;
   }
 
   getChambersCount() {
@@ -142,5 +162,15 @@ export class LockEngine {
 
   private selectRandomChamber(chambersCount: number) {
     return Math.trunc(Math.random() * chambersCount);
+  }
+
+  private loadHtmlElement(elementId: string): HTMLElement {
+    const hpElement = document.getElementById(elementId);
+    if (hpElement === null) {
+      throw new Error(
+        `Unable to locate element with ID '${elementId}' in the HTML`
+      );
+    }
+    return hpElement;
   }
 }

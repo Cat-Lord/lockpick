@@ -93,7 +93,6 @@ export class LockPick {
     const normalizedMouseX = mouseX / this.config.canvas.clientWidth;
 
     const rotationAngle = lerp(
-      // needs to be reversed, TODO: maybe refactor later
       180 + this.config.lockpickMovementSensitivity,
       0 - this.config.lockpickMovementSensitivity,
       normalizedMouseX
@@ -108,7 +107,6 @@ export class LockPick {
   draw() {
     this.context.save();
     this.context.rotate(this.rotationRadians + this.shakeAngle);
-    console.log(this.shakeAngle);
 
     this.context.translate(-this.scaledImageW, -this.scaledImageH / 2);
     this.context.drawImage(

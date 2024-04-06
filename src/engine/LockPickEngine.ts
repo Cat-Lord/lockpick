@@ -1,5 +1,5 @@
 import { Difficulties } from '../constants/Difficulty';
-import { createProxy } from './createNumberProxy';
+import { Proxy, createProxy } from './createNumberProxy';
 
 /**
  * Engine of a lock pick. A lock pick has health and
@@ -12,14 +12,13 @@ import { createProxy } from './createNumberProxy';
  * breaks and it isn't usable anymore.
  */
 export class LockPickEngine {
-  private readonly pickHealth: any; // TODO: minor requirement, make the type prettier
+  private readonly pickHealth: Proxy<number>;
   private readonly damageFactor: number;
 
   constructor(
     difficulty: Difficulties,
     healthChangeListener: (health: number) => void
   ) {
-    // when the pickHealth.value changes, the listener is called
     this.pickHealth = createProxy(100, healthChangeListener);
     // TODO: based on difficulty create various types of lock durabilities
     this.damageFactor = 25;

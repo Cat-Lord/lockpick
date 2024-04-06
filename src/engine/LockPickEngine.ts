@@ -21,7 +21,7 @@ export class LockPickEngine {
   ) {
     this.pickHealth = createProxy(100, healthChangeListener);
     // TODO: based on difficulty create various types of lock durabilities
-    this.damageFactor = 25;
+    this.damageFactor = 5;
   }
 
   isLockPickBroken() {

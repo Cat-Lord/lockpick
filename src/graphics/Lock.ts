@@ -59,13 +59,16 @@ export class Lock {
   }
 
   rotateLockPick(ev: MouseEvent) {
+    if (this.lockEngine.isSolved || this.lockPick.isBroken()) {
+      return;
+    }
     const mouseX = ev.clientX - this.canvas.offsetLeft;
     const canvasMouseX = constrain(mouseX, 0, this.config.canvas.clientWidth);
     this.lockPick.rotateLockPick(canvasMouseX);
   }
 
   pickTheLock() {
-    if (this.lockEngine.isSolved) {
+    if (this.lockEngine.isSolved || this.lockPick.isBroken()) {
       this.clearPickingTimeout();
       return;
     }

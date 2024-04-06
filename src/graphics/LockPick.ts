@@ -32,7 +32,6 @@ export class LockPick {
       );
     }
     this.lockPickHpElement = hpElement;
-    this.lockPickHpElement = hpElement;
     this.healthyLockpickImage = this.loadImage('lockpick-img');
     this.brokenLockpickImage = this.loadImage('broken-lockpick-img');
     this.lockpickImage = this.healthyLockpickImage; // changes based on lockpick health
@@ -74,14 +73,16 @@ export class LockPick {
     this.shakeAngle = Math.sin(this.shakeIncrement) / 20;
   }
 
-  // TODO: temporary solution to debug
   /*
     Reset shaking state.
   */
   stopShaking() {
-    this.lockpickImage = this.healthyLockpickImage;
     this.shakeIncrement = 0;
     this.shakeAngle = 0;
+  }
+
+  isBroken() {
+    return this.engine.isLockPickBroken();
   }
 
   break() {
